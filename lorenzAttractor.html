@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Lorenz Attractor</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link type="text/css" rel="stylesheet" href="style.css">
+</head>
+<body>
+
+	<div class="menuBar">
+		<div class="innerBar">
+		<img src="files/menu_icon.png" id="theMenuButton" height="40" width="38" alt="menu">
+		<div class="settingsDiv">
+			<label for="varX">X</label>
+			<input type="range" id="varX" name="varX" min="-50" max="100" value="1">
+			<label for="varY">Y</label>
+			<input type="range" id="varY" name="varY" min="-50" max="100" value="-1">
+			<label for="varZ">Z</label>
+			<input type="range" id="varZ" name="varZ" min="-50" max="100" value="1">
+
+			<label for="varSigma">Sigma</label>
+			<input type="range" id="varSigma" name="varSigma" min="2" max="25" value="10">
+			<label for="varRho">Rho</label>
+			<input type="range" id="varRho" name="varRho" min="15" max="40" value="28">
+			<label for="varBeta">Beta</label>
+			<input type="range" id="varBeta" name="varBeta" min="0" max="10" value="2.66666666667">
+		</div>
+		</div>
+	</div>
+
+	<div class="pointerDiv">
+
+	<img src="files/lorenzEquations.png" id="lorenzEquationsPic" alt="">
+
+	<img src="files/codeDifference.png" id="code" alt="">
+
+	<img src="files/convectionModel.png" id="convectionModel" alt="">
+
+	<img src="files/discovery.png" id="discovery" alt="">
+
+	<img src="files/forecast.png" id="forecast" alt="">
+
+	<img src="files/question.png" id="question" alt="">
+
+	<img src="files/question.png" id="question2" alt="">
+
+	<img src="files/question.png" id="question3" alt="">
+
+	<img src="files/codeDifference.png" id="codeDifference" alt="">
+
+	<img src="files/lorenzPic.jpg" id="lorenzPic" alt="">
+
+	<img src="files/butterfly.jpg" id="butterfly" alt="">
+
+	</div>
+	<div class="outLineDiv1" id="outLineDiv1" ></div>
+
+	<div class="outLineDiv2" id="outLineDiv2" ></div>
+
+	<div class="outLineDiv3" id="outLineDiv3" ></div>
+
+	<div class="underline1" id="underline1"  ></div>
+
+	<div class="underline2" id="underline2"  ></div>
+
+	<div class="underline3" id="underline3"  ></div>
+
+
+<script type="x-shader/x-vertex" id="vertexshader">
+
+	attribute float scale;
+	attribute vec3 color;
+	varying vec3 vColor;
+
+	void main() {
+		vColor = color;
+
+		vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+
+		gl_PointSize = scale * ( 300.0 / - mvPosition.z );
+
+		gl_Position = projectionMatrix * mvPosition;
+
+	}
+
+</script>
+
+<script type="x-shader/x-fragment" id="fragmentshader">
+
+	varying vec3 vColor;
+
+	void main() {
+
+		if ( length( gl_PointCoord - vec2( 0.5, 0.5 ) ) > 0.475 ) discard;
+
+		gl_FragColor = vec4( vColor, 1.0 );
+
+	}
+
+</script>
+
+
+<script type="importmap">
+	{
+		"imports": {
+			"three": "./files/three.module.js"	
+		}
+	}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import Stats from './files/stats.module.js';
+import {FlyControls}  from './files/FlyControls.js';
+
+let printTracker = 0;
+
+let lorenzPicShown = false;
+let codeShown = false;
+let bookShown = false;
+let convecModelShown = false;
+let diagramShown = false;
+let sunnyShown = false;
+let stormShown = false;
+let forecastShown = false;
+let codeDifferenceShown = false;
+let equationOutline1Shown = false;
+let equationOutline2Shown = false;
+let equationOutline3Shown = false;
+let underlineShown = false;
+let butterFlyShown = false;
+
+
+let camera, scene, renderer;
+let container, stats, controls;
+
+let lineOn = false;
+let hideDots = false;
+let animationRunning = -1;
+
+// the small change in time that is used to advance the solution of the equations over time, A smaller value of dt will result in a smoother animation, but it will also require more calculations.
+let dt = 0.002;
+
+let startingX = 20.0;
+let startingY = 20.0;
+let startingZ = 20.0;
+
+// Starting Conditions for our variables x, y, and z
+let x = 20.001;
+let y = 20.0;
+let z = 20.0;
+
+let x2 = 5.0001;
+let y2 = 3.0001;
+let z2 = -1.0001;
+
+let x3 = 10.00001;
+let y3 = 10.00001;
+let z3 = 10.00001;
+
+let x4 = 5.000001;
+let y4 = 5.000001;
+let z4 = 5.000001;
+
+let x5 = 7.0000001;
+let y5 = 7.0000001;
+let z5 = 7.0000001;
+
+let x6 = 100.00000001;
+let y6 = 0.00000001;
+let z6 = 3.00000001;
+
+let x7 = 9.000000001;
+let y7 = 9.000000001;
+let z7 = 9.000000001;
+
+
+
+
+
+
+
+
+
+
+x = 20.0;
+y = 20.0;
+z = 20.0;
+
+x2 =  x + 0.00001;
+y2 =  y + 0.00001;
+z2 =  z + 0.00001;
+
+x3 =  x + 0.000001;
+y3 =  y + 0.000001;
+z3 =  z + 0.000001;
+
+x4 =  x + 0.0000001;
+y4 =  y + 0.0000001;
+z4 =  z + 0.0000001;
+
+x5 =  x + 0.00000001;
+y5 =  y + 0.00000001;
+z5 =  z + 0.00000001;
+
+x6 =  x + 0.000000001;
+y6 =  y + 0.000000001;
+z6 =  z + 0.000000001;
+
+x7 =  x + 0.0000000001;
+y7 =  y + 0.0000000001;
+z7 =  z + 0.0000000001;
+
+
+
+
+
+
+
+
+
+
+
+
+let trackerIndex = 0;
+let trackerOn = false;
+
+// System Parameters, these parameters lead to chaotic behavior
+let sigma = 10;
+let rho = 28;
+let beta = 8/3;
+
+// amount of points for line drawing, and the iterated draw range amount
+let LineMaxPoints = 12000;
+let lineDrawPoint = 0;
+let lineDrawPoint2 = 0;
+let lineDrawPoint3 = 0;
+
+// Sets up the line and creates it
+var linePositions = new Float32Array (3 * LineMaxPoints);
+var lineGeometry = new THREE.BufferGeometry();
+lineGeometry.setAttribute ('position', new THREE.BufferAttribute (linePositions, 3));
+lineGeometry.setDrawRange (0, 0);
+const lineMaterial = new THREE.LineBasicMaterial( { color: 0x0cfaf2 } );
+const lorenzLineOne = new THREE.Line (lineGeometry, lineMaterial);
+
+// Sets up the second line and creates it
+var linePositions2 = new Float32Array (3 * LineMaxPoints);
+var lineGeometry2 = new THREE.BufferGeometry();
+lineGeometry2.setAttribute ('position', new THREE.BufferAttribute (linePositions2, 3));
+lineGeometry2.setDrawRange (0, 0);
+const lineMaterial2 = new THREE.LineBasicMaterial( { color: 0x0f6efc } );
+const lorenzLineOne2 = new THREE.Line (lineGeometry2, lineMaterial2);
+
+// Sets up the third line and creates it
+var linePositions3 = new Float32Array (3 * LineMaxPoints);
+var lineGeometry3 = new THREE.BufferGeometry();
+lineGeometry3.setAttribute ('position', new THREE.BufferAttribute (linePositions3, 3));
+lineGeometry3.setDrawRange (0, 0);
+const lineMaterial3 = new THREE.LineBasicMaterial( { color: 0xffffff} );
+const lorenzLineOne3 = new THREE.Line (lineGeometry3, lineMaterial3);
+
+var linePositions4 = new Float32Array (3 * LineMaxPoints);
+var lineGeometry4 = new THREE.BufferGeometry();
+lineGeometry4.setAttribute ('position', new THREE.BufferAttribute (linePositions4, 3));
+lineGeometry4.setDrawRange (0, 0);
+const lineMaterial4 = new THREE.LineBasicMaterial( { color: 0x00ffb3 } );
+const lorenzLineOne4 = new THREE.Line (lineGeometry4, lineMaterial4);
+
+var linePositions5 = new Float32Array (3 * LineMaxPoints);
+var lineGeometry5 = new THREE.BufferGeometry();
+lineGeometry5.setAttribute ('position', new THREE.BufferAttribute (linePositions5, 3));
+lineGeometry5.setDrawRange (0, 0);
+const lineMaterial5 = new THREE.LineBasicMaterial( { color: 0x0a82fa} );
+const lorenzLineOne5 = new THREE.Line (lineGeometry5, lineMaterial5);
+
+var linePositions6 = new Float32Array (3 * LineMaxPoints);
+var lineGeometry6 = new THREE.BufferGeometry();
+lineGeometry6.setAttribute ('position', new THREE.BufferAttribute (linePositions6, 3));
+lineGeometry6.setDrawRange (0, 0);
+const lineMaterial6 = new THREE.LineBasicMaterial( { color: 0x4cd900} );
+const lorenzLineOne6 = new THREE.Line (lineGeometry6, lineMaterial6);
+
+var linePositions7 = new Float32Array (3 * LineMaxPoints);
+var lineGeometry7 = new THREE.BufferGeometry();
+lineGeometry7.setAttribute ('position', new THREE.BufferAttribute (linePositions7, 3));
+lineGeometry7.setDrawRange (0, 0);
+const lineMaterial7 = new THREE.LineBasicMaterial( { color: 0x00ba88 } );
+const lorenzLineOne7 = new THREE.Line (lineGeometry7, lineMaterial7);
+
+
+// point index increments to draw more points in animate function
+// pointCloud is where we will store the points object
+let pointIndex = 0;
+let pointCloud;
+
+// Max number of particles for points
+// const NUMPARTICLES = 500*500;
+// all for points object
+const NUMPARTICLES = 200*200;
+const colors = new Float32Array( (NUMPARTICLES) * 3 );
+const pointPositions = new Float32Array( NUMPARTICLES * 3 );
+const scales = new Float32Array( NUMPARTICLES );
+
+let colorWheel = .60;
+// assigns each partile in the point structure its own color
+for (let index = 0; index < NUMPARTICLES; index++) {
+    let color = new THREE.Color();
+    color.setHSL(colorWheel, 1.0, 0.6);
+    color.toArray(colors, index * 3);
+
+    if (colorWheel > .12 && colorWheel < .28){
+        colorWheel += 0.01;
+    }
+
+	else if (colorWheel > .28 && colorWheel < .40){
+        colorWheel += 0.002;
+    }
+
+	else if (colorWheel > .55 && colorWheel < .78){
+        colorWheel += 0.0002;
+    }
+
+	else if (colorWheel > .78 && colorWheel < .99){
+        colorWheel += 0.001;
+    }
+
+
+    else {
+        colorWheel += 0.001;
+    }
+    
+	// colorWheel = 0.50;
+
+	// colorWheel += 0.001;
+
+    if (colorWheel >= 1) {
+        colorWheel = 0;
+    }
+}
+
+// BufferGeometry is a type of geometry that stores its vertex data in arrays of binary data, called "buffers". 
+const pointGeometry = new THREE.BufferGeometry();
+// Create a new attribute to store the colors
+const colorAttribute = new THREE.BufferAttribute( colors, 3 );
+// Add the attribute to the buffer geometry
+pointGeometry.setAttribute( 'color', colorAttribute );
+pointGeometry.setAttribute( 'position', new THREE.BufferAttribute( pointPositions, 3 ) );
+pointGeometry.setAttribute( 'scale', new THREE.BufferAttribute( scales, 1 ) );
+const pointMaterial = new THREE.ShaderMaterial( {
+    vertexShader: document.getElementById( 'vertexshader' ).textContent,
+    fragmentShader: document.getElementById( 'fragmentshader' ).textContent
+} );
+pointCloud = new THREE.Points( pointGeometry, pointMaterial );
+
+
+
+let windowHalfX = window.innerWidth / 2;
+let windowHalfY = window.innerHeight / 2;
+
+init();
+animate();
+
+function init() {
+	container = document.createElement( 'LorenzContainer' );
+	document.body.appendChild( container );
+
+	// A camera in three.js is an object that defines the point of view from which the scene is rendered.
+	camera = new THREE.PerspectiveCamera( 105, window.innerWidth / window.innerHeight, 0.0001, 100000 );
+	// sets the x,y,z position of the camera in the 3d space
+	camera.position.x = -456.3621803614003;
+	camera.position.y = 502.62828;
+	camera.position.z =  220.79551;
+	// sets the rotation of the camera
+	camera.rotation.x = -1.368636;
+	camera.rotation.y = -0.847074;
+	camera.rotation.z = 0.0136609;
+
+	// creates a new instance of a THREE.Scene object.
+	scene = new THREE.Scene();
+	
+	// scales up the line and adds it to the scene
+	lorenzLineOne.scale.set(15,15,15);
+	lorenzLineOne2.scale.set(15,15,15);
+	lorenzLineOne3.scale.set(15,15,15);
+	lorenzLineOne4.scale.set(15,15,15);
+	lorenzLineOne5.scale.set(15,15,15);
+	lorenzLineOne6.scale.set(15,15,15);
+	lorenzLineOne7.scale.set(15,15,15);
+    pointCloud.scale.set(15,15,15);
+	scene.add(lorenzLineOne, pointCloud, lorenzLineOne2, lorenzLineOne3, lorenzLineOne4, lorenzLineOne5 , lorenzLineOne6, lorenzLineOne7);
+
+	// A renderer in three.js is responsible for taking the 3D scene and the camera, and rendering the scene to a 2D image that can be displayed on the screen. 
+	renderer = new THREE.WebGLRenderer( { antialias: true } );
+	renderer.setPixelRatio( window.devicePixelRatio );
+	renderer.setSize( window.innerWidth, window.innerHeight );
+	container.appendChild( renderer.domElement );
+
+	// The FlyControls is a custom script that provides a first-person-like camera control,
+	controls = new FlyControls( camera, renderer.domElement );
+	controls.movementSpeed = 150;
+	controls.rollSpeed = Math.PI / 30;
+	controls.autoForward = false;
+	controls.dragToLook = true;
+
+    stats = new Stats();
+	// container.appendChild( stats.dom ); // uncomment this to show framerate
+
+    // removes mouse pointer when hovering over threejs container
+    container.style.touchAction = 'none';
+
+	let pointPositions = pointCloud.geometry.attributes.position.array;
+	for (let set = 0; set < NUMPARTICLES*3; set++) {
+		pointPositions[set] = -500;
+	}
+
+	// automatiicaly resizes window
+	window.addEventListener('keypress', onKeyPress );
+	window.addEventListener( 'resize', onWindowResize );
+
+
+
+	let sliderBeta = document.getElementById('varBeta');
+	sliderBeta.addEventListener('input', (event) => {
+	beta = event.target.value;
+	});
+
+	let sliderRho = document.getElementById('varRho');
+	sliderRho.addEventListener('input', (event) => {
+	rho = event.target.value;
+	});
+
+	let sliderSigma = document.getElementById('varSigma');
+	sliderSigma.addEventListener('input', (event) => {
+	sigma = event.target.value;
+	});
+}
+
+function onWindowResize() {
+	windowHalfX = window.innerWidth / 2;
+	windowHalfY = window.innerHeight / 2;
+	camera.aspect = window.innerWidth / window.innerHeight;
+	camera.updateProjectionMatrix();
+	renderer.setSize( window.innerWidth, window.innerHeight );
+}
+
+function onKeyPress(event) {
+    if (event.key === "l") {
+		lineOn = true;
+    }
+
+	else if (event.key == "1") {
+
+
+		if (lorenzPicShown == false){
+			document.getElementById("lorenzEquationsPic").style.opacity = "100";
+			lorenzPicShown = true;
+		}
+		else {
+			document.getElementById("lorenzEquationsPic").style.opacity = "0";
+			lorenzPicShown = false;
+		}
+	}
+
+	else if (event.key === "2") {
+	if (codeShown == false) {
+		codeShown = true;
+		document.getElementById("code").style.opacity = "100";
+	}
+	else {
+		codeShown = false;
+		document.getElementById("code").style.opacity = "0";}
+	}
+
+
+	else if (event.key === "3") {
+	if (convecModelShown == false) {
+		convecModelShown = true;
+		document.getElementById("convectionModel").style.opacity = "100";
+	}
+	else {
+		convecModelShown = false;
+		document.getElementById("convectionModel").style.opacity = "0";}
+	}
+
+	else if (event.key === "4") {
+	if (diagramShown == false) {
+		diagramShown = true;
+		document.getElementById("discovery").style.opacity = "100";
+	}
+	else {
+		diagramShown = false;
+		document.getElementById("discovery").style.opacity = "0";}
+	}
+
+
+	else if (event.key === "6") {
+	if (forecastShown == false) {
+		forecastShown = true;
+		// document.getElementById("forecast").style.display = "block";
+		document.getElementById("forecast").style.opacity = "100";
+		document.getElementById("question").style.opacity = "100";
+		document.getElementById("question2").style.opacity = "100";
+		document.getElementById("question3").style.opacity = "100";
+	}
+	else {
+		forecastShown = false;
+		document.getElementById("forecast").style.opacity = "0";
+		document.getElementById("question").style.opacity = "0";
+		document.getElementById("question2").style.opacity = "0";
+		document.getElementById("question3").style.opacity = "0";
+
+
+
+		// document.getElementById("storm").style.display = "none";
+		}
+	}
+
+
+
+	else if (event.key === "5") {
+	if (sunnyShown == false) {
+		sunnyShown = true;
+		document.getElementById("lorenzPic").style.opacity = "100";
+	}
+	else {
+		sunnyShown = false;
+		document.getElementById("lorenzPic").style.opacity = "0";
+		}
+	}
+
+	else if (event.key === "7") {
+	if (equationOutline1Shown == false) {
+		equationOutline1Shown = true;
+		document.getElementById("outLineDiv1").style.opacity = "100";
+	}
+	else {
+		equationOutline1Shown = false;
+		document.getElementById("outLineDiv1").style.opacity = "0";
+		}
+	}
+
+	else if (event.key === "8") {
+	if (equationOutline2Shown == false) {
+		equationOutline2Shown = true;
+		document.getElementById("outLineDiv2").style.opacity = "100";
+	}
+	else {
+		equationOutline2Shown = false;
+		document.getElementById("outLineDiv2").style.opacity = "0";
+		}
+	}
+
+	else if (event.key === "9") {
+	if (equationOutline3Shown == false) {
+		equationOutline3Shown = true;
+		document.getElementById("outLineDiv3").style.opacity = "100";
+	}
+	else {
+		equationOutline3Shown = false;
+		document.getElementById("outLineDiv3").style.opacity = "0";
+		}
+	}
+
+	else if (event.key === "0") {
+	if (underlineShown == false) {
+		underlineShown = true;
+		document.getElementById("underline1").style.opacity = "100";
+		document.getElementById("underline2").style.opacity = "100";
+		document.getElementById("underline3").style.opacity = "100";
+
+	}
+	else {
+		underlineShown = false;
+		document.getElementById("underline1").style.opacity = "0";
+		document.getElementById("underline2").style.opacity = "0";
+		document.getElementById("underline3").style.opacity = "0";
+		}
+	}
+
+	else if (event.key === "z") {
+	if (butterFlyShown == false) {
+		butterFlyShown = true;
+		document.getElementById("butterfly").style.opacity = "100";
+
+	}
+	else {
+		butterFlyShown = false;
+		document.getElementById("butterfly").style.opacity = "0";
+		}
+	}
+
+
+	
+
+	else if (event.key === "k") {
+		scene.remove(lorenzLineOne, lorenzLineOne2, lorenzLineOne3, lorenzLineOne4, lorenzLineOne5 , lorenzLineOne6, lorenzLineOne7);
+    }
+	else if (event.key === "j") {
+		scene.add(lorenzLineOne, lorenzLineOne2, lorenzLineOne3, lorenzLineOne4, lorenzLineOne5, lorenzLineOne, lorenzLineOne7);
+    }
+	else if (event.key === "h") {
+		trackerOn = true;
+		trackerIndex = 0;
+		let scales = pointCloud.geometry.attributes.scale.array;
+		for (let i = 0; i < scales.length; i++) {
+ 	 		scales[i] = 5;
+		}
+		pointCloud.geometry.attributes.scale.needsUpdate = true;
+		scene.remove(lorenzLineOne, lorenzLineOne2, lorenzLineOne3, lorenzLineOne4, lorenzLineOne5 , lorenzLineOne6, lorenzLineOne7);
+    }
+	else if (event.key === "p") {
+		animationRunning = animationRunning *(-1);
+	}
+	else if (event.key == "o") {
+		// animationRunning = 1;
+		dt = 0.0025;
+		
+		let valX = Math.floor(Math.random() * 161) - 80;
+		let valY = Math.floor(Math.random() * 101) - 50; 
+		let valZ = Math.floor(Math.random() * 101) - 50; 
+		
+
+		x = valX;
+		y = valY;
+		z = valZ;
+
+		x2 = x + 0.0001;
+		y2 = y + 0.0001;
+		z2 = z + 0.0001;
+
+		x3 = x + 0.1;
+		y3 = y + 0.1;
+		z3 = z + 0.1;
+
+
+		let linePositions7 = lorenzLineOne7.geometry.attributes.position.array;
+		let linePositions6 = lorenzLineOne6.geometry.attributes.position.array;
+		let linePositions5 = lorenzLineOne5.geometry.attributes.position.array;
+		let linePositions4 = lorenzLineOne4.geometry.attributes.position.array;
+		let linePositions3 = lorenzLineOne3.geometry.attributes.position.array;
+		let linePositions2 = lorenzLineOne2.geometry.attributes.position.array;
+		let linePositions = lorenzLineOne.geometry.attributes.position.array;
+		let pointPositions = pointCloud.geometry.attributes.position.array;
+
+		for (let j = 0; j < trackerIndex; j++){
+			pointPositions[j] = -500;
+		}
+
+		trackerIndex = 0;
+		lineDrawPoint = 0;
+		lineDrawPoint2 = 0;
+		lineDrawPoint3 = 0;
+
+		pointCloud.geometry.attributes.color.needsUpdate = true;
+		pointCloud.geometry.attributes.position.needsUpdate = true;
+		pointCloud.geometry.attributes.scale.needsUpdate = true;
+
+		lineGeometry.setDrawRange (0, lineDrawPoint);
+		lorenzLineOne.geometry.attributes.position.needsUpdate = true;
+
+		lineGeometry2.setDrawRange (0, lineDrawPoint);
+		lorenzLineOne2.geometry.attributes.position.needsUpdate = true;
+
+		lineGeometry3.setDrawRange (0, lineDrawPoint);
+		lorenzLineOne3.geometry.attributes.position.needsUpdate = true;
+
+		lineGeometry4.setDrawRange (0, lineDrawPoint);
+		lorenzLineOne4.geometry.attributes.position.needsUpdate = true;
+
+		lineGeometry5.setDrawRange (0, lineDrawPoint);
+		lorenzLineOne5.geometry.attributes.position.needsUpdate = true;
+
+		lineGeometry6.setDrawRange (0, lineDrawPoint);
+		lorenzLineOne6.geometry.attributes.position.needsUpdate = true;
+
+		lineGeometry7.setDrawRange (0, lineDrawPoint);
+		lorenzLineOne7.geometry.attributes.position.needsUpdate = true;
+
+		// scene.remove(lorenzLineOne, lorenzLineOne2, lorenzLineOne3);
+		// scene.add(lorenzLineOne, lorenzLineOne2, lorenzLineOne3);
+	}
+	
+
+	else if (event.key == "m") {
+		// animationRunning = 1;
+		dt = 0.0025;
+		
+
+		x = 20;
+		y = 20;
+		z = 20;
+
+		x2 = x + 0.000001;
+		y2 = y + 0.000001;
+		z2 = z + 0.000001;
+
+		x3 = x + 0.000001;
+		y3 = y + 0.000001;
+		z3 = z + 0.000001;
+
+		x4 = x + 0.000001;
+		y4 = y + 0.000001;
+		z4 = z + 0.000001;
+
+		x5 = x + 0.000001;
+		y5 = y + 0.000001;
+		z5 = z + 0.000001;
+
+		x6 = x + 0.000001;
+		y6 = y + 0.000001;
+		z6 = z + 0.000001;
+
+		x7 = x + 0.00000001;
+		y7 = y + 0.00000001;
+		z7 = z + 0.00000001;
+
+		
+
+
+		let linePositions7 = lorenzLineOne7.geometry.attributes.position.array;
+		let linePositions6 = lorenzLineOne6.geometry.attributes.position.array;
+		let linePositions5 = lorenzLineOne5.geometry.attributes.position.array;
+		let linePositions4 = lorenzLineOne4.geometry.attributes.position.array;
+		let linePositions3 = lorenzLineOne3.geometry.attributes.position.array;
+		let linePositions2 = lorenzLineOne2.geometry.attributes.position.array;
+		let linePositions = lorenzLineOne.geometry.attributes.position.array;
+		let pointPositions = pointCloud.geometry.attributes.position.array;
+
+		for (let j = 0; j < trackerIndex; j++){
+			pointPositions[j] = -500;
+		}
+
+		trackerIndex = 0;
+		lineDrawPoint = 0;
+		lineDrawPoint2 = 0;
+		lineDrawPoint3 = 0;
+
+		pointCloud.geometry.attributes.color.needsUpdate = true;
+		pointCloud.geometry.attributes.position.needsUpdate = true;
+		pointCloud.geometry.attributes.scale.needsUpdate = true;
+
+		lineGeometry.setDrawRange (0, lineDrawPoint);
+		lorenzLineOne.geometry.attributes.position.needsUpdate = true;
+
+		lineGeometry2.setDrawRange (0, lineDrawPoint);
+		lorenzLineOne2.geometry.attributes.position.needsUpdate = true;
+
+		lineGeometry3.setDrawRange (0, lineDrawPoint);
+		lorenzLineOne3.geometry.attributes.position.needsUpdate = true;
+
+		lineGeometry4.setDrawRange (0, lineDrawPoint);
+		lorenzLineOne4.geometry.attributes.position.needsUpdate = true;
+
+		lineGeometry5.setDrawRange (0, lineDrawPoint);
+		lorenzLineOne5.geometry.attributes.position.needsUpdate = true;
+
+		lineGeometry6.setDrawRange (0, lineDrawPoint);
+		lorenzLineOne6.geometry.attributes.position.needsUpdate = true;
+
+		lineGeometry7.setDrawRange (0, lineDrawPoint);
+		lorenzLineOne7.geometry.attributes.position.needsUpdate = true;
+
+		// scene.remove(lorenzLineOne, lorenzLineOne2, lorenzLineOne3);
+		// scene.add(lorenzLineOne, lorenzLineOne2, lorenzLineOne3);
+	}
+
+}
+
+
+function animate() {
+    controls.update(0.01)
+	// render();
+    stats.update();
+
+	if (animationRunning == -1) {
+	printTracker++;
+
+	
+	if ((printTracker % 200) == 0 ){console.log(x,y,z);}
+	let linePositions7 = lorenzLineOne7.geometry.attributes.position.array;
+	let linePositions6 = lorenzLineOne6.geometry.attributes.position.array;
+	let linePositions5 = lorenzLineOne5.geometry.attributes.position.array;
+	let linePositions4 = lorenzLineOne4.geometry.attributes.position.array;
+	let linePositions3 = lorenzLineOne3.geometry.attributes.position.array;
+	let linePositions2 = lorenzLineOne2.geometry.attributes.position.array;
+    let linePositions = lorenzLineOne.geometry.attributes.position.array;
+    let pointPositions = pointCloud.geometry.attributes.position.array;
+	let scales = pointCloud.geometry.attributes.scale.array;
+
+	
+
+		let changeX = (sigma * (y-x)) * dt;
+		let changeY = (x * (rho - z) -y) * dt;
+		let changeZ = (x * y - beta * z)* dt;
+		
+		x = x + changeX;
+		y = y + changeY;
+		z = z + changeZ;
+
+	if (trackerOn == false) {
+		pointPositions[0] = x;
+		pointPositions[1] = y; // makes this one
+		pointPositions[2] = z; // makes this one
+		scales[pointIndex] = 52;
+
+		let changeX2 = (sigma * (y2-x2)) * dt;
+		let changeY2 = (x2 * (rho - z2) -y2) * dt;
+		let changeZ2 = (x2 * y2 - beta * z2)* dt;
+		x2 = x2 + changeX2;
+		y2 = y2 + changeY2;
+		z2 = z2 + changeZ2;
+
+		pointPositions[9] = x2;
+		pointPositions[10] = y2;
+		pointPositions[11] = z2;
+
+		let changeX3 = (sigma * (y3-x3)) * dt;
+		let changeY3 = (x3 * (rho - z3) -y3) * dt;
+		let changeZ3 = (x3 * y3 - beta * z3)* dt;
+		x3 = x3 + changeX3;
+		y3 = y3 + changeY3;
+		z3 = z3 + changeZ3;
+
+		pointPositions[18] = x3;
+		pointPositions[19] = y3;
+		pointPositions[20] = z3;
+
+
+		let changeX4 = (sigma * (y4-x4)) * dt;
+		let changeY4 = (x4 * (rho - z4) -y4) * dt;
+		let changeZ4 = (x4 * y4 - beta * z4)* dt;
+		x4 = x4 + changeX4;
+		y4 = y4 + changeY4;
+		z4 = z4 + changeZ4;
+
+		pointPositions[36] = x4;
+		pointPositions[37] = y4;
+		pointPositions[38] = z4;
+
+		let changeX5 = (sigma * (y5-x5)) * dt;
+		let changeY5 = (x5 * (rho - z5) -y5) * dt;
+		let changeZ5 = (x5 * y5 - beta * z5)* dt;
+		x5 = x5 + changeX5;
+		y5 = y5 + changeY5;
+		z5 = z5 + changeZ5;
+
+		pointPositions[45] = x5;
+		pointPositions[46] = y5;
+		pointPositions[47] = z5;
+
+		let changeX6 = (sigma * (y6-x6)) * dt;
+		let changeY6 = (x6 * (rho - z6) -y6) * dt;
+		let changeZ6 = (x6 * y6 - beta * z6)* dt;
+		x6 = x6 + changeX6;
+		y6 = y6 + changeY6;
+		z6 = z6 + changeZ6;
+
+		pointPositions[54] = x6;
+		pointPositions[55]= y6;
+		pointPositions[56] = z6;
+
+		let changeX7 = (sigma * (y7-x7)) * dt;
+		let changeY7 = (x7 * (rho - z7) -y7) * dt;
+		let changeZ7 = (x7 * y7 - beta * z7)* dt;
+		x7 = x7 + changeX7;
+		y7 = y7 + changeY7;
+		z7 = z7 + changeZ7;
+
+		pointPositions[63] = x7;
+		pointPositions[64]= y7;
+		pointPositions[65] = z7;
+
+		
+
+
+
+	}
+
+	if (trackerOn == true) {
+		pointPositions[trackerIndex] = x;
+		pointPositions[trackerIndex+1] = y;
+		pointPositions[trackerIndex+2] = z;
+		scales[pointIndex] = 3;
+		trackerIndex = trackerIndex +3;
+	}
+	
+
+	if (hideDots == true) {
+		pointPositions[0] = -1000;
+		pointPositions[1] = -1000;
+		pointPositions[2] = -1000;
+
+		pointPositions[9] = -1000;
+		pointPositions[10] = -1000;
+		pointPositions[11] = -1000;
+
+		pointPositions[18] = -1000;
+		pointPositions[19] = -1000;
+		pointPositions[20] = -1000;
+
+	}
+
+
+	if (lineOn == true){
+	if (lineDrawPoint < LineMaxPoints) {lineDrawPoint++;}
+	}
+
+	linePositions[3*lineDrawPoint  ] = x;
+	linePositions[3*lineDrawPoint+1] = y; // makes this one
+	linePositions[3*lineDrawPoint+2] = z; // makes this one
+
+	linePositions2[3*lineDrawPoint  ] = x2;
+	linePositions2[3*lineDrawPoint+1] = y2;
+	linePositions2[3*lineDrawPoint+2] = z2;
+
+	linePositions3[3*lineDrawPoint  ] = x3;
+	linePositions3[3*lineDrawPoint+1] = y3;
+	linePositions3[3*lineDrawPoint+2] = z3;
+
+	linePositions4[3*lineDrawPoint  ] = x4;
+	linePositions4[3*lineDrawPoint+1] = y4;
+	linePositions4[3*lineDrawPoint+2] = z4;
+
+	linePositions5[3*lineDrawPoint  ] = x5;
+	linePositions5[3*lineDrawPoint+1] = y5;
+	linePositions5[3*lineDrawPoint+2] = z5;
+
+	linePositions6[3*lineDrawPoint  ] = x6;
+	linePositions6[3*lineDrawPoint+1] = y6;
+	linePositions6[3*lineDrawPoint+2] = z6;
+
+	linePositions7[3*lineDrawPoint  ] = x7;
+	linePositions7[3*lineDrawPoint+1] = y7;
+	linePositions7[3*lineDrawPoint+2] = z7;
+
+    // set the needsUpdate property to true to update attributes
+	pointCloud.geometry.attributes.color.needsUpdate = true;
+	pointCloud.geometry.attributes.position.needsUpdate = true;
+	pointCloud.geometry.attributes.scale.needsUpdate = true;
+
+	lineGeometry.setDrawRange (0, lineDrawPoint);
+	lorenzLineOne.geometry.attributes.position.needsUpdate = true;
+
+	lineGeometry2.setDrawRange (0, lineDrawPoint);
+	lorenzLineOne2.geometry.attributes.position.needsUpdate = true;
+
+	lineGeometry3.setDrawRange (0, lineDrawPoint);
+	lorenzLineOne3.geometry.attributes.position.needsUpdate = true;
+
+	lineGeometry4.setDrawRange (0, lineDrawPoint);
+	lorenzLineOne4.geometry.attributes.position.needsUpdate = true;
+    
+	lineGeometry5.setDrawRange (0, lineDrawPoint);
+	lorenzLineOne5.geometry.attributes.position.needsUpdate = true;
+
+	lineGeometry6.setDrawRange (0, lineDrawPoint);
+	lorenzLineOne6.geometry.attributes.position.needsUpdate = true;
+
+	lineGeometry7.setDrawRange (0, lineDrawPoint);
+	lorenzLineOne7.geometry.attributes.position.needsUpdate = true;
+
+    if (pointIndex < (NUMPARTICLES)) {pointIndex += 3;}
+	}
+
+	else {
+		linePositions[3*lineDrawPoint  ] =  x;
+		linePositions[3*lineDrawPoint+1] =  y;
+		linePositions[3*lineDrawPoint+2] =  z;
+
+		linePositions2[3*lineDrawPoint  ] = x2;
+		linePositions2[3*lineDrawPoint+1] = y2;
+		linePositions2[3*lineDrawPoint+2] = z2;
+
+		linePositions3[3*lineDrawPoint  ] = x3;
+		linePositions3[3*lineDrawPoint+1] = y3;
+		linePositions3[3*lineDrawPoint+2] = z3;
+
+		linePositions4[3*lineDrawPoint  ] = x4;
+		linePositions4[3*lineDrawPoint+1] = y4;
+		linePositions4[3*lineDrawPoint+2] = z4;
+
+		linePositions5[3*lineDrawPoint  ] = x5;
+		linePositions5[3*lineDrawPoint+1] = y5;
+		linePositions5[3*lineDrawPoint+2] = z5;
+
+		linePositions6[3*lineDrawPoint  ] = x6;
+		linePositions6[3*lineDrawPoint+1] = y6;
+		linePositions6[3*lineDrawPoint+2] = z6;
+
+		linePositions7[3*lineDrawPoint  ] = x7;
+		linePositions7[3*lineDrawPoint+1] = y7;
+		linePositions7[3*lineDrawPoint+2] = z7;
+
+		// set the needsUpdate property to true to update attributes
+		pointCloud.geometry.attributes.color.needsUpdate = true;
+		pointCloud.geometry.attributes.position.needsUpdate = true;
+		pointCloud.geometry.attributes.scale.needsUpdate = true;
+
+		lineGeometry.setDrawRange (0, lineDrawPoint);
+		lorenzLineOne.geometry.attributes.position.needsUpdate = true;
+
+		lineGeometry2.setDrawRange (0, lineDrawPoint);
+		lorenzLineOne2.geometry.attributes.position.needsUpdate = true;
+
+		lineGeometry3.setDrawRange (0, lineDrawPoint);
+		lorenzLineOne3.geometry.attributes.position.needsUpdate = true;
+
+		lineGeometry4.setDrawRange (0, lineDrawPoint);
+		lorenzLineOne4.geometry.attributes.position.needsUpdate = true;
+    
+		lineGeometry5.setDrawRange (0, lineDrawPoint);
+		lorenzLineOne5.geometry.attributes.position.needsUpdate = true;
+
+		lineGeometry6.setDrawRange (0, lineDrawPoint);
+		lorenzLineOne6.geometry.attributes.position.needsUpdate = true;
+
+		lineGeometry7.setDrawRange (0, lineDrawPoint);
+		lorenzLineOne6.geometry.attributes.position.needsUpdate = true;
+	}
+
+
+	// ######
+
+    // setTimeout(() => {}, 10000); // pause for 1 second each iteration
+    renderer.render( scene, camera);
+  requestAnimationFrame( animate );
+}
+
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,289 @@
+body {
+	margin: 0;
+	background-color: #000;
+	color: #fff;
+	font-family: Monospace;
+	overscroll-behavior: none;
+	overflow: hidden;
+}
+
+lorenzContainer {
+	cursor: none;
+}
+
+.pointerDiv {
+	cursor: none;
+}
+
+.menuBar {
+	width: 100%;
+	height: auto;
+	display: none;
+	/* background-color: white; */
+}
+
+#theMenuButton {
+	background-color: rgb(0, 0, 0);
+	padding: 4px;
+	margin: 0px;
+	border-radius: 4px;
+	/* margin-left: 20px; */
+}
+
+
+#theMenuButton:hover {
+	background-color: rgb(62, 17, 168);
+}
+
+.settingsDiv {
+	color: white;
+	display: none;
+	/* padding-top: 5px; */
+	padding-left: 20px;
+	padding-top: 10px;
+	/* margin-top: 10px; */
+	position: absolute;
+	/* top: 40px; */
+	left: 50px;
+}
+
+.innerBar {
+	width: 50px;
+}
+
+.innerBar:hover .settingsDiv {
+	display: inline;
+}
+
+#butterfly {
+	width: 1400px;
+	position: absolute;
+	top: 220px;
+	left: 650px;
+	border-radius: 10px;
+	opacity: 0;
+	transition: opacity .2s ease-in
+
+}
+
+#lorenzEquationsPic {
+	position: absolute;
+	top: 45px;
+	left: 45px;
+	border-radius: 5px;
+	opacity: 0;
+	width: 350px;
+	transition: opacity .2s ease-in
+}
+
+#lorenzPic {
+	position: absolute;
+	top: 45px;
+	left: 1750px;
+	border-radius: 5px;
+	opacity: 0;
+	width: 950px;
+	transition: opacity .2s ease-in
+}
+
+
+
+
+#discovery {
+	border-radius: 5px;
+    position: absolute;
+    top: 45px;
+	left: 45px;
+    opacity: 0;
+	width: 1000px;
+    transition: opacity .3s ease-in;
+}
+
+#code {
+	border-radius: 5px;
+    position: absolute;
+    left: 415px;
+    top: 45px;
+	width: 400px;
+	width: 665px;
+    opacity: 0;
+    transition: opacity .3s ease-in;
+}
+
+#forecast {
+	border-radius: 5px;
+    position: absolute;
+    top: 75px;
+	left: 905px;
+	/* width: 800px; */
+    opacity: 0;
+    transition: opacity .3s ease-in;
+}
+
+#question {
+	border-radius: 5px;
+    position: absolute;
+    top: 25px;
+	left: 1613px;
+	/* width: 800px; */
+    opacity: 0;
+	transform: rotate(330deg);
+    transition: opacity .3s ease-in;
+}
+
+#question2 {
+	border-radius: 5px;
+    position: absolute;
+    top: 5px;
+	left: 1660px;
+	/* width: 800px; */
+    opacity: 0;
+	transform: rotate(355deg);
+    transition: opacity .3s ease-in;
+}
+
+#question3 {
+	border-radius: 5px;
+    position: absolute;
+    top: 22px;
+	left: 1705px;
+	/* width: 800px; */
+    opacity: 0;
+	transform: rotate(18deg);
+    transition: opacity .3s ease-in;
+}
+
+#codeDifference {
+	border-radius: 5px;
+    position: absolute;
+    top: 45px;
+	left: 45px;
+	width: 500px;
+	width: 1200px;
+    opacity: 0;
+    transition: opacity .3s ease-in;
+}
+
+
+#convectionModel {
+	border-radius: 5px;
+    position: absolute;
+    top: 45px;
+	left: 45px;
+	width: 800px;
+    opacity: 0;
+    transition: opacity .3s ease-in;
+}
+
+
+
+#sunny {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 100vw;
+	height: 100vh;
+    opacity: 0;
+    transition: opacity .3s ease-in;
+	display: none;
+}
+
+#storm {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 100vw;
+	height: 100vh;
+    opacity: 0;
+	display: none;
+    transition: opacity .3s ease-in;
+}
+
+
+
+#book {
+	border-radius: 5px;
+    position: absolute;
+    left: 50px;
+    top: 100px;
+    opacity: 0;
+    transition: opacity .3s ease-in;
+}
+
+
+
+.outLineDiv1 {
+	position: absolute;
+	border-radius: 5px;
+	border: 3px solid red;
+	top: 47px;
+	left: 420px;
+	width: 590px;
+	height: 38px;
+	transition: opacity .3s ease-in;
+	opacity: 0;
+
+}
+
+.outLineDiv2 {
+	position: absolute;
+	border-radius: 5px;
+	border: 3px solid red;
+	top: 120px;
+	left: 480px;
+	width: 550px;
+	height: 30px;
+	transition: opacity .3s ease-in;
+	opacity: 0;
+}
+
+.outLineDiv3 {
+	position: absolute;
+	border-radius: 5px;
+	border: 3px solid red;
+	top: 260px;
+	left: 480px;
+	width: 260px;
+	height: 30px;
+	transition: opacity .3s ease-in;
+	opacity: 0;
+}
+
+#underline1 {
+	position: absolute;
+	border-radius: 5px;
+	background-color: red;
+	border: px solid red;
+	top: 97px;
+	left: 80px;
+	width: 25px;
+	height: 5px;
+	transition: opacity .3s ease-in;
+	opacity: 0;
+}
+
+#underline2 {
+	position: absolute;
+	border-radius: 5px;
+	background-color: red;
+	border: px solid red;
+	top: 217px;
+	left: 80px;
+	width: 25px;
+	height: 5px;
+	transition: opacity .3s ease-in;
+	opacity: 0;
+}
+
+#underline3 {
+	position: absolute;
+	border-radius: 5px;
+	background-color: red;
+	border: px solid red;
+	top: 330px;
+	left: 83px;
+	width: 25px;
+	height: 5px;
+	transition: opacity .3s ease-in;
+	opacity: 0;
+}
